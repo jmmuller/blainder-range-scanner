@@ -394,7 +394,9 @@ def performScan(context,
             # if location is None, no hit was found within the given range
             if closestHit is not None:
                 meanDist = closestHit.distance #central counts double
+                meanIntensity = closestHit.intensity #central counts double, no hits count 0
                 nbDists = 1
+                nbDistsMax = 1
                 if spotSizeRad>0:
                     for dx in [-spotSizeRad,0,spotSizeRad]:
                         for dy in [-spotSizeRad,0,spotSizeRad]:
@@ -410,8 +412,11 @@ def performScan(context,
                             if (hit is not None):
                                 nbDists += 1
                                 meanDist += hit.distance
+                                meanIntensity += closestHit.intensity
+                            nbDistsMax += 1
                     #print("distance", closestHit.distance, meanDist/nbDists)
                     closestHit.distance = meanDist/nbDists # there is at least the central ray
+                    closestHit.intensity = meanIntensity/nbDistsMax # loose intensity if no hit
                 
                 # set the image x/y coordinates for tof sensor
                 closestHit.x = indexX
