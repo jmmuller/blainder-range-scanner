@@ -275,6 +275,8 @@ def performScan(context,
                 targets, materialMappings,
                 categoryIDs, partIDs, trees, depsgraph):
 
+    spotAngleRadJM = 0.01
+
     if measureTime:
         startTime = time.time()
 
@@ -390,10 +392,30 @@ def performScan(context,
             # calculate ray direction 
             direction = destination - origin
 
+            print("center : ", origin, direction)
             closestHit = castRay(targets, trees, origin, direction, distanceUpper, materialMappings, depsgraph, debugLines, debugOutput, iorAir, False, maxReflectionDepth - 1)
 
             # if location is None, no hit was found within the given range
-            if closestHit is not None: 
+            if closestHit is not None:
+                meanDist = closestHit.distance #central counts double
+                nbDists = 1
+                if spotAngleRadJM>0: # JM
+                    for dx in [-spotAngleRadJM,0,spotAngleRadJM]:
+                        for dy in [-spotAngleRadJM,0,spotAngleRadJM]:
+                            quatX2 = Quaternion((0.0, 1.0, 0.0), dx)
+                            quatY2 = Quaternion((1.0, 0.0, 0.0), dy)
+                            quatAll2 = quatX2 @ quatY2
+                            vec2 = vec.copy()
+                            vec2.rotate(quatAll2)
+                            destination2 = vec2 + sensor.matrix_world.translation
+                            direction2 = destination2 - origin
+                            #print("spot : ", dx, dy, origin, direction2)
+                            hit = castRay(targets, trees, origin, direction2, distanceUpper, materialMappings, depsgraph, debugLines, debugOutput, iorAir, False, maxReflectionDepth - 1)
+                            if (hit is not None):
+                                nbDists += 1
+                                meanDist += hit.distance
+                    print("distance", closestHit.distance, meanDist/nbDists)
+                    closestHit.distance = meanDist/nbDists # there is at least the central ray
                 # set the image x/y coordinates for tof sensor
                 closestHit.x = indexX
                 closestHit.y = indexY
@@ -535,6 +557,7 @@ def performScan(context,
                     # error model: https://github.com/mgschwan/blensor/blob/master/release/scripts/addons/blensor/gaussian_error_model.py#L21
                     #              https://github.com/mgschwan/blensor/blob/0b6cca9f189b1e072cfd8aaa6360deeab0b96c61/release/scripts/addons/blensor/generic_lidar.py#L172
                     noise += error_distribution.applyNoise(mu, sigma)
+                    #noise += error_distribution.applyNoise(mu, sigma) + 1 # JMM
 
                 if debugOutput:
                     print("Location ", closestHit.location)
