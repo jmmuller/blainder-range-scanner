@@ -260,7 +260,7 @@ def castRay(targets, trees, origin, direction, maxRange, materialMappings, depsg
 
 def performScan(context, 
                 scannerType, scannerObject,
-                reflectivityLower, distanceLower, reflectivityUpper, distanceUpper, maxReflectionDepth,
+                reflectivityLower, spotSizeRad, distanceLower, reflectivityUpper, distanceUpper, maxReflectionDepth,
                 intervalStart, intervalEnd, fovX, stepsX, fovY, stepsY, percentage,
                 scannedValues, startIndex,
                 firstFrame, lastFrame, frameNumber, rotationsPerSecond,
@@ -274,9 +274,6 @@ def performScan(context,
                 debugLines, debugOutput, outputProgress, measureTime, singleRay, destinationObject, targetObject,
                 targets, materialMappings,
                 categoryIDs, partIDs, trees, depsgraph):
-
-    spotAngleRadJM = 0.01
-
     if measureTime:
         startTime = time.time()
 
@@ -392,16 +389,15 @@ def performScan(context,
             # calculate ray direction 
             direction = destination - origin
 
-            print("center : ", origin, direction)
             closestHit = castRay(targets, trees, origin, direction, distanceUpper, materialMappings, depsgraph, debugLines, debugOutput, iorAir, False, maxReflectionDepth - 1)
 
             # if location is None, no hit was found within the given range
             if closestHit is not None:
                 meanDist = closestHit.distance #central counts double
                 nbDists = 1
-                if spotAngleRadJM>0: # JM
-                    for dx in [-spotAngleRadJM,0,spotAngleRadJM]:
-                        for dy in [-spotAngleRadJM,0,spotAngleRadJM]:
+                if spotSizeRad>0:
+                    for dx in [-spotSizeRad,0,spotSizeRad]:
+                        for dy in [-spotSizeRad,0,spotSizeRad]:
                             quatX2 = Quaternion((0.0, 1.0, 0.0), dx)
                             quatY2 = Quaternion((1.0, 0.0, 0.0), dy)
                             quatAll2 = quatX2 @ quatY2
@@ -414,8 +410,9 @@ def performScan(context,
                             if (hit is not None):
                                 nbDists += 1
                                 meanDist += hit.distance
-                    print("distance", closestHit.distance, meanDist/nbDists)
+                    #print("distance", closestHit.distance, meanDist/nbDists)
                     closestHit.distance = meanDist/nbDists # there is at least the central ray
+                
                 # set the image x/y coordinates for tof sensor
                 closestHit.x = indexX
                 closestHit.y = indexY

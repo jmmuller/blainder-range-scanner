@@ -206,6 +206,8 @@ class WM_OT_LOAD_PRESET(Operator):
                         properties.scannerType = value
                     elif key == "reflectivityLower":
                         properties.reflectivityLower = value
+                    elif key == "spotSizeRad":
+                        properties.spotSizeRad = value
                     elif key == "distanceLower":
                         properties.distanceLower = value
                     elif key == "reflectivityUpper":
@@ -235,6 +237,8 @@ class WM_OT_LOAD_PRESET(Operator):
                         properties.scannerType = value
                     elif key == "reflectivityLower":
                         properties.reflectivityLower = value
+                    elif key == "spotSizeRad":
+                        properties.spotSizeRad = value
                     elif key == "distanceLower":
                         properties.distanceLower = value
                     elif key == "reflectivityUpper":
@@ -264,6 +268,8 @@ class WM_OT_LOAD_PRESET(Operator):
                         properties.scannerType = value
                     elif key == "reflectivityLower":
                         properties.reflectivityLower = value
+                    elif key == "spotSizeRad":
+                        properties.spotSizeRad = value
                     elif key == "distanceLower":
                         properties.distanceLower = value
                     elif key == "reflectivityUpper":
@@ -395,7 +401,7 @@ class ScannerProperties(PropertyGroup):
         min = 0.0,
         max = 1.0
     )
-
+    
     distanceLower: FloatProperty(
         name = "Lower distance",
         description = "minimum angle (degree)",
@@ -709,6 +715,7 @@ class ScannerProperties(PropertyGroup):
         ]
     )
 
+
     mu: FloatProperty(
         name = "Mean",
         description = "Mean",
@@ -719,6 +726,14 @@ class ScannerProperties(PropertyGroup):
         name = "Standard deviation",
         description = "Standard deviation",
         default = 0.01,
+    )
+
+    spotSizeRad: FloatProperty(
+        name = "Spot size",
+        description = "half sport size in rad",
+        default = 0.01,
+        min = 0.0,
+        max = 1.0
     )
 
 
@@ -1316,7 +1331,7 @@ def scan_rotating(context,
 
         xStepDegree, fovX, yStepDegree, fovY, rotationsPerSecond,
 
-        reflectivityLower, distanceLower, reflectivityUpper, distanceUpper, maxReflectionDepth,
+        reflectivityLower, spotSizeRad, distanceLower, reflectivityUpper, distanceUpper, maxReflectionDepth,
         
         enableAnimation, frameStart, frameEnd, frameStep, frameRate,
 
@@ -1360,6 +1375,7 @@ def scan_rotating(context,
     properties.noiseType = noiseType
     properties.mu = mu
     properties.sigma = sigma
+    properties.spotSizeRad = spotSizeRad
     properties.noiseAbsoluteOffset = noiseAbsoluteOffset
     properties.noiseRelativeOffset = noiseRelativeOffset
 
@@ -1471,7 +1487,7 @@ def scan_static(context,
 
         resolutionX, fovX, resolutionY, fovY, resolutionPercentage,
 
-        reflectivityLower, distanceLower, reflectivityUpper, distanceUpper, maxReflectionDepth,
+        reflectivityLower, spotSizeRad, distanceLower, reflectivityUpper, distanceUpper, maxReflectionDepth,
         
         enableAnimation, frameStart, frameEnd, frameStep, frameRate,
 
@@ -1516,6 +1532,7 @@ def scan_static(context,
     properties.noiseType = noiseType
     properties.mu = mu
     properties.sigma = sigma
+    properties.spotSizeRad = spotSizeRad
     properties.noiseAbsoluteOffset = noiseAbsoluteOffset
     properties.noiseRelativeOffset = noiseRelativeOffset
 
@@ -1965,6 +1982,10 @@ class OBJECT_PT_NOISE_PANEL(MAIN_PANEL, Panel):
         verticalLayout.prop(properties, "mu")
         verticalLayout.prop(properties, "sigma")
         column.enabled = properties.addNoise
+
+        layout.separator()
+
+        layout.prop(properties, "spotSizeRad")
 
 
 class OBJECT_PT_WEATHER_PANEL(MAIN_PANEL, Panel):

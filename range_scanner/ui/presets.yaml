@@ -10,7 +10,8 @@
   xStepDegree: 1.0
   fovY: 90.0
   yStepDegree: 1.0
-  rotationsPerSecond: 10.0        
+  rotationsPerSecond: 10.0
+  spotSizeRad: 0.01
 
 - name: Generic sonar
   description: Some generic sonar

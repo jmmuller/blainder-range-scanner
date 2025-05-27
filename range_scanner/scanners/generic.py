@@ -388,7 +388,7 @@ def startScan(context, properties, objectName):
 
             numberOfHits = lidar.performScan(context, 
                                 properties.scannerType, properties.scannerObject,
-                                properties.reflectivityLower, properties.distanceLower, properties.reflectivityUpper, properties.distanceUpper, properties.maxReflectionDepth,
+                                properties.reflectivityLower, properties.spotSizeRad, properties.distanceLower, properties.reflectivityUpper, properties.distanceUpper, properties.maxReflectionDepth,
                                 intervalStart, intervalEnd, properties.fovX, stepsX, properties.fovY, stepsY, properties.resolutionPercentage,
                                 scannedValues, startIndex,
                                 firstFrame, lastFrame, frameNumber, properties.rotationsPerSecond,
