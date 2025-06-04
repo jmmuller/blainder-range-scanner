@@ -392,32 +392,42 @@ def performScan(context,
             closestHit = castRay(targets, trees, origin, direction, distanceUpper, materialMappings, depsgraph, debugLines, debugOutput, iorAir, False, maxReflectionDepth - 1)
 
             # if location is None, no hit was found within the given range
-            if closestHit is not None:
-                meanDist = closestHit.distance #central counts double
-                meanIntensity = closestHit.intensity #central counts double, no hits count 0
-                nbDists = 1
-                nbDistsMax = 1
-                if spotSizeRad>0:
-                    for dx in [-spotSizeRad,0,spotSizeRad]:
-                        for dy in [-spotSizeRad,0,spotSizeRad]:
-                            quatX2 = Quaternion((0.0, 1.0, 0.0), dx)
-                            quatY2 = Quaternion((1.0, 0.0, 0.0), dy)
-                            quatAll2 = quatX2 @ quatY2
-                            vec2 = vec.copy()
-                            vec2.rotate(quatAll2)
-                            destination2 = vec2 + sensor.matrix_world.translation
-                            direction2 = destination2 - origin
-                            #print("spot : ", dx, dy, origin, direction2)
-                            hit = castRay(targets, trees, origin, direction2, distanceUpper, materialMappings, depsgraph, debugLines, debugOutput, iorAir, False, maxReflectionDepth - 1)
-                            if (hit is not None):
-                                nbDists += 1
-                                meanDist += hit.distance
-                                meanIntensity += closestHit.intensity
-                            nbDistsMax += 1
+            if spotSizeRad>0:
+                meanDist = 0
+                meanIntensity = 0
+                nbDists = 0
+                nbDistsMax = 0
+                
+                if closestHit is not None:
+                    meanDist = closestHit.distance #central counts double
+                    meanIntensity = closestHit.intensity #central counts double, no hits count 0
+                    nbDists = 1
+                    nbDistsMax = 1
+                
+                for dx in [-spotSizeRad,0,spotSizeRad]:
+                    for dy in [-spotSizeRad,0,spotSizeRad]:
+                        quatX2 = Quaternion((0.0, 1.0, 0.0), dx)
+                        quatY2 = Quaternion((1.0, 0.0, 0.0), dy)
+                        quatAll2 = quatX2 @ quatY2
+                        vec2 = vec.copy()
+                        vec2.rotate(quatAll2)
+                        destination2 = vec2 + sensor.matrix_world.translation
+                        direction2 = destination2 - origin
+                        #print("spot : ", dx, dy, origin, direction2)
+                        hit = castRay(targets, trees, origin, direction2, distanceUpper, materialMappings, depsgraph, debugLines, debugOutput, iorAir, False, maxReflectionDepth - 1)
+                        if (hit is not None):
+                            if closestHit is None:
+                                closestHit = hit #to have at leas one hit object
+                            nbDists += 1
+                            meanDist += hit.distance
+                            meanIntensity += hit.intensity
+                        nbDistsMax += 1
+                if nbDists>0:
                     #print("distance", closestHit.distance, meanDist/nbDists)
                     closestHit.distance = meanDist/nbDists # there is at least the central ray
                     closestHit.intensity = meanIntensity/nbDistsMax # loose intensity if no hit
-                
+
+            if closestHit is not None:
                 # set the image x/y coordinates for tof sensor
                 closestHit.x = indexX
                 closestHit.y = indexY
