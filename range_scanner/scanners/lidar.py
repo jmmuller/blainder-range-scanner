@@ -605,6 +605,16 @@ def performScan(context,
                 scannedValues[valueIndex] = closestHit
                 valueIndex += 1
             else:
+                # save (0,0,0) into array for this direction
+                scannedValues[valueIndex] = hit_info.HitInfo( mathutils.Vector((0,0,0)), mathutils.Vector((0,0,0)), 0, 0, None)
+                scannedValues[valueIndex].noiseLocation = mathutils.Vector((0,0,0))
+                scannedValues[valueIndex].noiseDistance = 0
+                scannedValues[valueIndex].intensity = 0
+                scannedValues[valueIndex].x = 0
+                scannedValues[valueIndex].y = 0
+                scannedValues[valueIndex].color = (0,0,0)
+                
+                valueIndex += 1
                 if debugOutput:
                     print("NO HIT within range of %f" % distanceUpper)
             
