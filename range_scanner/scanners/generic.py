@@ -104,7 +104,7 @@ def getTargetIndices(targets, debugOutput):
 
     return (categoryIDs, partIDs)
 
-def addMeshToScene(name, values, useNoiseLocation):
+def addMeshToScene(name, values, useNoiseLocation, sensor = None):
     # Create new mesh to store all measurements as points
     mesh = bpy.data.meshes.new(name='created mesh')
     bm = bmesh.new()        
@@ -114,7 +114,7 @@ def addMeshToScene(name, values, useNoiseLocation):
         for hit in values:                
             bm.verts.new((hit.noiseLocation.x, hit.noiseLocation.y, hit.noiseLocation.z))
     else:
-        for hit in values:                
+        for hit in values:
             bm.verts.new((hit.location.x, hit.location.y, hit.location.z))
 
     # make the bmesh the object's mesh
@@ -128,6 +128,9 @@ def addMeshToScene(name, values, useNoiseLocation):
 
     # Create Object whose Object Data is our new mesh
     obj = bpy.data.objects.new(name, mesh)
+    
+    if sensor is not None: # the mesh is in an other object frame
+        obj.matrix_world = sensor.matrix_world
 
     # Add *Object* to the scene, not the mesh
     scene = bpy.context.scene

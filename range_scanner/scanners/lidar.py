@@ -606,8 +606,8 @@ def performScan(context,
                 valueIndex += 1
             else:
                 # save (0,0,0) into array for this direction
-                scannedValues[valueIndex] = hit_info.HitInfo( mathutils.Vector((0,0,0)), mathutils.Vector((0,0,0)), 0, 0, None)
-                scannedValues[valueIndex].noiseLocation = mathutils.Vector((0,0,0))
+                scannedValues[valueIndex] = hit_info.HitInfo( origin, mathutils.Vector((0,0,0)), 0, 0, None)
+                scannedValues[valueIndex].noiseLocation = origin
                 scannedValues[valueIndex].noiseDistance = 0
                 scannedValues[valueIndex].intensity = 0
                 scannedValues[valueIndex].x = 0
@@ -641,12 +641,19 @@ def performScan(context,
     # as explained here (https://stackoverflow.com/a/32398318/13440564), resizing
     # would cause a copy, so we slice the array instead
     slicedScannedValues = scannedValues[startIndex:valueIndex]
-
+    
+    
     if addMesh:
-        generic.addMeshToScene("real_values_frame_%d" % frameNumber, slicedScannedValues, False)
+        # go to local scanner frame, only if "export single frames", since sensor may move each frames
+        mat_world2local = sensor.matrix_world.inverted()
+        for scannedVal in slicedScannedValues:
+            scannedVal.location = mat_world2local @ scannedVal.location
+            if scannedVal.noiseLocation is not None:
+                scannedVal.noiseLocation = mat_world2local @ scannedVal.noiseLocation
+        generic.addMeshToScene("real_values_frame_%d" % frameNumber, slicedScannedValues, False, sensor)
 
         if exportNoiseData:
-            generic.addMeshToScene("noise_values_frame_%d" % frameNumber, slicedScannedValues, True)
+            generic.addMeshToScene("noise_values_frame_%d" % frameNumber, slicedScannedValues, True, sensor)
 
     if measureTime:
         print("Meshes: %s s" % (time.time() - startTime))
