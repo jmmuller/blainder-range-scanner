@@ -679,7 +679,7 @@ def performScan(context,
                 fileExporter.exportCSV()
 
             if exportPLY:
-                fileExporter.exportPLY()
+                fileExporter.exportPLY(True) # export with z primary rotation axis
 
             if scannerType == generic.ScannerType.static.name:
                 if exportSegmentedImage:
